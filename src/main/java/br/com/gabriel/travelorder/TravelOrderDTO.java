@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class TravelOrderDTO {
 
+    private Long travelOrderId;
     private String fromAirport;
     private String toAirport;
     private Integer nights;
@@ -17,17 +18,18 @@ public class TravelOrderDTO {
 
     }
 
-    private TravelOrderDTO(String fromAirport, String toAirport, Integer nights) {
+    private TravelOrderDTO(Long travelOrderId, String fromAirport, String toAirport, Integer nights) {
+        this.travelOrderId = travelOrderId;
         this.fromAirport = fromAirport;
         this.toAirport = toAirport;
         this.nights = nights;
     }
 
-    public static TravelOrderDTO of(Flight flight, Hotel hotel) {
-        return new TravelOrderDTO(flight.fromAirport, flight.toAirport, hotel.nights);
+    public static TravelOrderDTO of(TravelOrder travelOrder, Flight flight, Hotel hotel) {
+        return new TravelOrderDTO(travelOrder.id, flight.fromAirport, flight.toAirport, hotel.nights);
     }
 
-    public static TravelOrderDTO of(String fromAirport, String toAirport, Integer nights) {
-        return new TravelOrderDTO(fromAirport, toAirport, nights);
+    public static TravelOrderDTO of(Long travelOrderId, String fromAirport, String toAirport, Integer nights) {
+        return new TravelOrderDTO(travelOrderId, fromAirport, toAirport, nights);
     }
 }

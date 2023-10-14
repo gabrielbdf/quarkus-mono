@@ -2,8 +2,12 @@ package br.com.gabriel.hotel;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Entity;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Hotel extends PanacheEntity {
 
     public Long travelOrderId;

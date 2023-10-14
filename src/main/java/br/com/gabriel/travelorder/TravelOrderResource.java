@@ -1,12 +1,11 @@
 package br.com.gabriel.travelorder;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import br.com.gabriel.flight.Flight;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
+
 import br.com.gabriel.flight.FlightResource;
-import br.com.gabriel.hotel.Hotel;
 import br.com.gabriel.hotel.HotelResource;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -22,6 +21,9 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/orders")
 public class TravelOrderResource {
 
+    @Channel("quote-requests")
+    Emitter<TravelOrderDTO> quoteRequestEmitter;
+
     @Inject
     FlightResource flightResource;
 
@@ -35,7 +37,7 @@ public class TravelOrderResource {
                 .<TravelOrder>listAll()
                 .stream()
                 .map(item -> TravelOrderDTO
-                        .of(flightResource.findByTravelOrderId(item.id),
+                        .of(item, flightResource.findByTravelOrderId(item.id),
                                 hotelResource.findHotelByTravelOrderId(item.id)))
                 .toList();
 
@@ -64,16 +66,9 @@ public class TravelOrderResource {
         order.id = null;
         order.persist();
 
-        Flight flight = new Flight();
-        flight.travelOrderId = order.id;
-        flight.fromAirport = orderDTO.getFromAirport();
-        flight.toAirport = orderDTO.getToAirport();
-        flightResource.createFlight(flight);
+        orderDTO.setTravelOrderId(order.id);
 
-        Hotel hotel = new Hotel();
-        hotel.travelOrderId = order.id;
-        hotel.nights = orderDTO.getNights();
-        hotelResource.createHotel(hotel);
+        this.quoteRequestEmitter.send(orderDTO).toCompletableFuture().join();
 
         return order;
     }
